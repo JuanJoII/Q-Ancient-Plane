@@ -101,7 +101,7 @@ Cualquier cambio podría romper la conexión y el flujo de trabajo.
 
 Con todo configurado, ya puedes ejecutar código en Maya:
 
-1. Abre en VSCode el archivo que deseas correr (por ejemplo, `main.py`).
+1. Abre en VSCode el archivo que deseas correr (para probar la conexión hay un fichero de prueba que crea una esfera y un cubo, este archivo es `test.py`).
 2. Presiona **`Ctrl + Shift + B`**.
 3. El archivo se enviará automáticamente a Maya a través del puerto configurado.
 
