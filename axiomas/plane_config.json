@@ -1,0 +1,27 @@
+{
+  "FUSELAJE": {
+    "posicion": [0, 0, 0],
+    "rotacion": [0, 0, 0],
+    "escala": [1.0, 1.0, 1.0]
+  },
+  "ALAS": {
+    "posicion": [0, 0, 0],
+    "rotacion": [0, 0, 0],
+    "escala": [1.0, 1.0, 1.0]
+  },
+  "CABEZA": {
+    "posicion": [0, 0, 0],
+    "rotacion": [0, 0, 0],
+    "escala": [1.0, 1.0, 1.0]
+  },
+  "COLA": {
+    "posicion": [0, 0, 0],
+    "rotacion": [0, 0, 0],
+    "escala": [1.0, 1.0, 1.0]
+  },
+  "ORNAMENTACION": {
+    "posicion": [0, 0.5, 0],
+    "rotacion": [0, 0, 0],
+    "escala": [1.0, 1.0, 1.0]
+  }
+}

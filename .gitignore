@@ -11,4 +11,6 @@ wheels/
 
 .idea
 .ruff_cache
+.env
+modelos/
 
