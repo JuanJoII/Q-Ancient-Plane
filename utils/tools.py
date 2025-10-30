@@ -1,11 +1,45 @@
 import os, json, random
 import maya.cmds as cmds
 
-CARPETA_MODELOS = r"C:\Users\57314\Desktop\Fokin_Universidad\TechnicalArt\QAnciant_Plane\modelos"
-CONFIG_JSON = r"C:\Users\57314\Desktop\Fokin_Universidad\TechnicalArt\QAnciant_Plane\axiomas\plane_config.json"
+CARPETA_MODELOS = r"C:\Users\STEF\Documents\Universidad\09_Noveno_Semestre\TechnicalArt\PF_AvionesQuimbaya\modelos"
+CONFIG_JSON = r"C:\Users\STEF\Documents\Universidad\09_Noveno_Semestre\TechnicalArt\PF_AvionesQuimbaya\Q-Ancient-Plane\axiomas\plane_config.json"
 
 with open(CONFIG_JSON, 'r') as f:
     CONFIG = json.load(f)
+
+COLORES_PARTES = {
+    "FUSELAJE": [0.7, 0.7, 0.8],      # Gris azulado
+    "ALAS": [0.85, 0.85, 0.9],         # Gris claro
+    "CABEZA": [0.9, 0.75, 0.6],        # Beige/crema
+    "COLA": [0.8, 0.65, 0.5],          # Marrón claro
+    "ORNAMENTACION": [0.9, 0.8, 0.3]   # Dorado
+}
+
+def crear_y_asignar_material(obj, parte):
+    """
+    Crea un material Lambert y lo asigna al objeto
+    """
+    nombre_material = f"MAT_{parte}"
+    nombre_sg = f"{nombre_material}_SG"
+    
+    # Verificar si el material ya existe, si no crearlo
+    if not cmds.objExists(nombre_material):
+        material = cmds.shadingNode('lambert', asShader=True, name=nombre_material)
+        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=nombre_sg)
+        cmds.connectAttr(f"{material}.outColor", f"{shading_group}.surfaceShader", force=True)
+        
+        # Asignar color predeterminado
+        color = COLORES_PARTES.get(parte, [0.5, 0.5, 0.5])
+        cmds.setAttr(f"{material}.color", *color, type="double3")
+        print(f"Material {nombre_material} creado con color {color}")
+    else:
+        shading_group = nombre_sg
+        print(f"Material {nombre_material} ya existe, reutilizando")
+    
+    # Asignar el material al objeto
+    cmds.select(obj)
+    cmds.hyperShade(assign=nombre_material)
+    print(f"Material {nombre_material} asignado a {obj}")
 
 def obtener_variantes(parte):
     prefijo = parte.lower() + "_QAP_"
