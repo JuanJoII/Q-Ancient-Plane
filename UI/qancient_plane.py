@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 from utils.tools import generar_parte
+from utils.emerge import emerge_plane
 
 def crear_ui():
     if cmds.window("GeneradorAvion", exists=True):
@@ -14,6 +15,7 @@ def crear_ui():
     cmds.button(label="Generar Cabeza", c=lambda *_: generar_parte("CABEZA"))
     cmds.button(label="Generar Cola", c=lambda *_: generar_parte("COLA"))
     cmds.button(label="Generar Ornamentación", c=lambda *_: generar_parte("ORNAMENTACION"))
+    cmds.button(label="Emerger Avión", c=lambda *_: emerge_plane())
 
     cmds.setParent("..")
     cmds.showWindow("GeneradorAvion")
