@@ -1,8 +1,12 @@
 import os, json, random
+from dotenv import load_dotenv
 import maya.cmds as cmds
 
-CARPETA_MODELOS = r"C:\Users\57314\Desktop\Fokin_Universidad\TechnicalArt\QAnciant_Plane\modelos"
-CONFIG_JSON = r"C:\Users\57314\Desktop\Fokin_Universidad\TechnicalArt\QAnciant_Plane\axiomas\plane_config.json"
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+load_dotenv(dotenv_path)
+
+CARPETA_MODELOS: str = os.getenv("CARPETA_MODELOS")
+CONFIG_JSON: str = os.getenv("CONFIG_JSON")
 
 with open(CONFIG_JSON, 'r') as f:
     CONFIG = json.load(f)
