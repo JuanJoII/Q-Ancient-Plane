@@ -2,26 +2,44 @@
   "FUSELAJE": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
-    "escala": [1.0, 1.0, 1.0]
+    "escala": [1.0, 1.0, 1.0],
+    "deformaciones": [
+      {
+        "selection_set": "loop_deformacion_fuselaje_B",
+        "escala": [1.1, 1.0, 1.1],
+        "rango_random": [0.9, 1.2],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      }
+    ]
   },
+
   "ALAS": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
-    "escala": [1.0, 1.0, 1.0]
+    "escala": [1.0, 1.0, 1.0],
+    "deformaciones": []
   },
+
   "CABEZA": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
-    "escala": [1.0, 1.0, 1.0]
+    "escala": [1.0, 1.0, 1.0],
+    "deformaciones": []
   },
+
   "COLA": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
-    "escala": [1.0, 1.0, 1.0]
+    "escala": [1.0, 1.0, 1.0],
+    "deformaciones": []
   },
+
   "ORNAMENTACION": {
-    "posicion": [0, 0.5, 0],
+    "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
-    "escala": [1.0, 1.0, 1.0]
+    "escala": [1.0, 1.0, 1.0],
+    "deformaciones": []
   }
 }
