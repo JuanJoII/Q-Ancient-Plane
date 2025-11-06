@@ -13,4 +13,5 @@ wheels/
 .ruff_cache
 .env
 modelos/
+modelos_v1/
 
