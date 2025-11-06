@@ -1,4 +1,4 @@
-from rig import core_plane, wings_plane
+from PlaneRig import core_plane, wings_plane
 
 def crear_rig_completo():
     """

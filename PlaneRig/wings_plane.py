@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from utils.config import CONFIG
+from Utils.config import CONFIG
 
 def crear_wing_joints():
     """

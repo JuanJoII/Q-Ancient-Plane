@@ -1,8 +1,7 @@
 import os
 import random
 import maya.cmds as cmds
-from utils.config import CARPETA_MODELOS, CONFIG
-from utils.deform import aplicar_deformaciones
+from Utils.config import CARPETA_MODELOS, CONFIG
 
 
 def obtener_variantes(parte):

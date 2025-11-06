@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from utils.tools import generar_parte, CONFIG
+from Utils.tools import generar_parte, CONFIG
 
 
 def emerge_plane():

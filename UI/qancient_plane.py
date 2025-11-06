@@ -1,7 +1,7 @@
 import maya.cmds as cmds
-from utils.tools import generar_parte
-from utils.emerge import emerge_plane
-from rig import create_joints, spline_auto_rig
+from Utils.tools import generar_parte
+from Utils.emerge import emerge_plane
+from PlaneRig import create_joints, spline_auto_rig
 
 
 def crear_ui():
