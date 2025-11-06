@@ -14,96 +14,64 @@ def obtener_variantes(parte):
     ]
 
 
-def generar_parte(parte):
-    # === 1. ELIMINAR EXISTENTE ===
-    nombre_final = f"{parte}_GENERADO"
-    if cmds.objExists(nombre_final):
-        try:
-            cmds.delete(nombre_final)
-            print(f"Eliminado anterior: {nombre_final}")
-        except:
-            pass
-
-    # === 2. OBTENER VARIANTE ===
+def generar_parte(parte, manejar_locators=True):
     variantes = obtener_variantes(parte)
     if not variantes:
-        cmds.warning(f"No hay modelos .ma para {parte}")
+        cmds.warning(f"No se encontraron modelos para {parte}")
         return
+
+    nombre_existente = f"{parte}_GENERADO"
+    if cmds.objExists(nombre_existente):
+        cmds.delete(nombre_existente)
+        print(f"Se eliminó la versión anterior de {parte}")
 
     archivo = random.choice(variantes)
     ruta = os.path.join(CARPETA_MODELOS, archivo)
 
-    # === 3. IMPORTAR CON NAMESPACE TEMPORAL ===
-    ns_temp = f"tmp_{parte}_{random.randint(1000, 9999)}"
     antes = set(cmds.ls(assemblies=True))
-    try:
-        cmds.file(ruta, i=True, namespace=ns_temp, force=True)
-        print(f"Importado: {archivo} con namespace {ns_temp}")
-    except Exception as e:
-        cmds.warning(f"Error importando {archivo}: {e}")
-        return
-
-    # === 4. DETECTAR OBJETOS NUEVOS ===
+    cmds.file(ruta, i=True, type="mayaAscii", ignoreVersion=True, ra=True,
+              mergeNamespacesOnClash=False, options="v=0;", pr=True)
     despues = set(cmds.ls(assemblies=True))
     nuevos = list(despues - antes)
 
     if not nuevos:
-        cmds.warning("No se detectó ningún objeto nuevo tras importar")
+        cmds.warning(f"No se detectó objeto tras importar {archivo}")
         return
 
-    # Usar el primer objeto como principal
-    obj = nuevos[0]
-    try:
-        transform = cmds.rename(obj, nombre_final)
-    except:
-        transform = obj
+    # Agrupar todo lo importado bajo un mismo grupo
+    grupo = cmds.group(nuevos, n=nombre_existente)
+    print(f"[✓] {parte} importado desde {archivo} con {len(nuevos)} nodos")
 
-    # === 5. TRAER LOS OBJECTSETS AL ROOT (fuera del namespace) ===
-    sets_en_namespace = cmds.ls(f"{ns_temp}:*", type="objectSet")
-    for old_set in sets_en_namespace:
-        nombre_limpio = old_set.split(":", 1)[-1]
-        if cmds.objExists(nombre_limpio):
-            cmds.delete(nombre_limpio)
-        try:
-            nuevo_set = cmds.rename(old_set, nombre_limpio)
-            print(f"Set transferido: {nuevo_set}")
-        except Exception as e:
-            print(f"No se pudo transferir {old_set}: {e}")
+    # Si manejar_locators=True, preservar locators y no aplicarles transformaciones
+    if manejar_locators:
+        locators = cmds.ls(f"{nombre_existente}|*LOC*", type="transform")
+        if locators:
+            print(f"[i] {len(locators)} locators detectados en {parte}: {locators}")
+        else:
+            print(f"[i] No se detectaron locators en {parte}")
+    else:
+        # Eliminar locators si no se van a usar
+        locs = cmds.ls(f"{nombre_existente}|*LOC*", type="transform")
+        if locs:
+            cmds.delete(locs)
+            print(f"[i] Locators eliminados de {parte}")
 
-    # === 6. ELIMINAR NAMESPACE ===
-    try:
-        cmds.namespace(removeNamespace=ns_temp, deleteNamespaceContent=False)
-    except:
-        pass
+    # Aplicar transformaciones al grupo principal
+    data = CONFIG[parte]
+    cmds.move(*data.get("posicion", [0, 0, 0]), grupo)
+    cmds.rotate(*data.get("rotacion", [0, 0, 0]), grupo)
+    cmds.scale(*data.get("escala", [1, 1, 1]), grupo)
 
-    # Resetear jerarquía y transformaciones
-    # --- Resetear jerarquía y transformaciones ---
-    padres = cmds.listRelatives(transform, parent=True)
-    if padres:
-        try:
-            cmds.parent(transform, world=True)
-            print(f"{transform} desparentado del grupo {padres[0]}")
-        except Exception as e:
-            print(f"No se pudo desparentar {transform}: {e}")
+    # Corregir normales (solo para geometrías)
+    for nodo in nuevos:
+        if cmds.nodeType(nodo) == "transform":
+            shapes = cmds.listRelatives(nodo, shapes=True) or []
+            if any("mesh" in cmds.nodeType(s) for s in shapes):
+                try:
+                    cmds.polyNormal(nodo, normalMode=0, userNormalMode=0, ch=False)
+                except:
+                    pass
 
-    # Freeze transforms
-    cmds.makeIdentity(transform, apply=True, t=True, r=True, s=True, n=False)
-    cmds.xform(transform, pivots=(0, 0, 0), worldSpace=True)
+    print(f"[✓] {parte} generado correctamente con locators preservados")
+    return grupo
 
-    # === 7. APLICAR TRANSFORMACIONES ===
-    if parte in CONFIG:
-        data = CONFIG[parte]
-        cmds.move(*data.get("posicion", [0, 0, 0]), transform)
-        cmds.rotate(*data.get("rotacion", [0, 0, 0]), transform)
-        cmds.scale(*data.get("escala", [1, 1, 1]), transform)
-
-    # === 8. CORREGIR NORMALES ===
-    shapes = cmds.listRelatives(transform, shapes=True, fullPath=True)
-    if shapes:
-        cmds.polyNormal(shapes[0], normalMode=0, userNormalMode=0, ch=False)
-
-    # === 9. APLICAR DEFORMACIONES ===
-    aplicar_deformaciones(parte, transform)
-
-    print(f"{parte} generado correctamente → {nombre_final}")
-    return transform
