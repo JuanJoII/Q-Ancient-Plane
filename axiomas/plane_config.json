@@ -19,6 +19,7 @@
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
     "escala": [1.0, 1.0, 1.0],
+    "locator_names": ["wing_L_LOC", "wing_R_LOC"],
     "deformaciones": []
   },
 
