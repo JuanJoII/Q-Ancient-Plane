@@ -6,7 +6,7 @@ def crear_terreno_montanoso(nombre="terreno", subdivisiones=50, escala=150,
                             altura_max=27, octavas=4, seed=None,
                             pos_x=0, pos_y=-35, pos_z=0):
     """
-    Crea un terreno fractal tipo montañoso.
+    Crea un terreno fractal tipo montañoso, eliminando cualquier terreno previo con el mismo nombre.
     
     Args:
         nombre: Nombre del objeto.
@@ -17,6 +17,11 @@ def crear_terreno_montanoso(nombre="terreno", subdivisiones=50, escala=150,
         seed: Semilla para generación procedural (None = aleatoria).
         pos_x, pos_y, pos_z: Posición del terreno en el espacio 3D.
     """
+    # ✅ Eliminar terreno existente si ya hay uno con ese nombre
+    if cmds.objExists(nombre):
+        print(f"Eliminando terreno previo: {nombre}")
+        cmds.delete(nombre)
+    
     # Generar o usar semilla
     if seed is None:
         seed = generate_seed()
@@ -59,7 +64,7 @@ def crear_terreno_montanoso(nombre="terreno", subdivisiones=50, escala=150,
     # Suavizar el terreno
     cmds.polySmooth(plano, divisions=1)
     
-    # ✅ Mover el terreno a su posición final
+    # Mover el terreno a su posición final
     cmds.move(pos_x, pos_y, pos_z, plano, absolute=True)
     
     print(f"Terreno '{nombre}' creado en posición ({pos_x}, {pos_y}, {pos_z})")
