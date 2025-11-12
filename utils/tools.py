@@ -12,6 +12,28 @@ def obtener_variantes(parte):
         if f.startswith(prefijo) and f.endswith(".ma")
     ]
 
+def corregir_normales_forzado(objeto):
+    """Corrige normales y winding de todas las mallas dentro del objeto."""
+    if not cmds.objExists(objeto):
+        cmds.warning(f"El objeto '{objeto}' no existe.")
+        return
+
+    meshes = cmds.listRelatives(objeto, allDescendents=True, type="mesh", fullPath=True) or []
+    if not meshes:
+        cmds.warning(f"No se encontraron meshes dentro de '{objeto}'.")
+        return
+
+    for mesh in meshes:
+        parent = cmds.listRelatives(mesh, parent=True, fullPath=True)[0]
+        cmds.makeIdentity(parent, apply=True, translate=True, rotate=True, scale=True)
+        cmds.delete(parent, ch=True)
+        cmds.polyNormalPerVertex(mesh, unFreezeNormal=True)
+        cmds.polyNormal(mesh, normalMode=2, userNormalMode=0, ch=False)
+        cmds.polySoftEdge(mesh, angle=180, ch=False)
+
+    cmds.select(clear=True)
+
+
 
 def generar_parte(parte, manejar_locators=True):
     variantes = obtener_variantes(parte)
@@ -28,8 +50,10 @@ def generar_parte(parte, manejar_locators=True):
     ruta = os.path.join(CARPETA_MODELOS, archivo)
 
     antes = set(cmds.ls(assemblies=True))
-    cmds.file(ruta, i=True, type="mayaAscii", ignoreVersion=True, ra=True,
-              mergeNamespacesOnClash=False, options="v=0;", pr=True)
+    cmds.file(
+        ruta, i=True, type="mayaAscii", ignoreVersion=True, ra=True,
+        mergeNamespacesOnClash=False, options="v=0;", pr=True
+    )
     despues = set(cmds.ls(assemblies=True))
     nuevos = list(despues - antes)
 
@@ -55,22 +79,12 @@ def generar_parte(parte, manejar_locators=True):
             cmds.delete(locs)
             print(f"[i] Locators eliminados de {parte}")
 
-    # Aplicar transformaciones al grupo principal
-    data = CONFIG[parte]
+    data = CONFIG.get(parte, {})
     cmds.move(*data.get("posicion", [0, 0, 0]), grupo)
     cmds.rotate(*data.get("rotacion", [0, 0, 0]), grupo)
     cmds.scale(*data.get("escala", [1, 1, 1]), grupo)
 
-    # Corregir normales (solo para geometrías)
-    for nodo in nuevos:
-        if cmds.nodeType(nodo) == "transform":
-            shapes = cmds.listRelatives(nodo, shapes=True) or []
-            if any("mesh" in cmds.nodeType(s) for s in shapes):
-                try:
-                    cmds.polyNormal(nodo, normalMode=0, userNormalMode=0, ch=False)
-                except:
-                    pass
+    corregir_normales_forzado(grupo)
 
-    print(f"[✓] {parte} generado correctamente con locators preservados")
+    print(f"[✓] {parte} generado correctamente con forzado aplicado")
     return grupo
-
