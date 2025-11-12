@@ -5,7 +5,7 @@
     "escala": [1.0, 1.0, 1.0],
     "deformaciones": [
       {
-        "selection_set": "loop_deformacion_fuselaje_B",
+        "selection_set": "fuselaje_QAP_002_loop_deformacion_fuselaje_B",
         "escala": [1.1, 1.0, 1.1],
         "rango_random": [0.9, 1.2],
         "ejes": [1, 1, 1],
