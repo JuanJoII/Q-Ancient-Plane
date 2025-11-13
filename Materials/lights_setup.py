@@ -37,7 +37,31 @@ def setup_lights():
     if cmds.pluginInfo('mtoa', query=True, loaded=True):
         skydome = cmds.shadingNode('aiSkyDomeLight', asLight=True, name="SkyDome_Light")
         cmds.setAttr(f"{skydome}.intensity", 0.3)
-        print("[✓] SkyDome Light de Arnold creado.")
+        
+        # Crear ramp para el cielo
+        ramp_sky = cmds.shadingNode("ramp", asTexture=True, name="SkyDome_Ramp")
+        
+        # Configurar el ramp como V Ramp (vertical)
+        cmds.setAttr(f"{ramp_sky}.type", 0)  # 0 = V Ramp (vertical)
+        cmds.setAttr(f"{ramp_sky}.interpolation", 1)  # Linear
+        
+        # Configurar colores del cielo (abajo a arriba)
+        # Posición 0 (abajo) - Horizonte claro
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[0].position", 0.0)
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[0].color", 0.7, 0.85, 1.0, type="double3")  # Azul claro
+        
+        # Posición 1 (medio) - Cielo medio
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[1].position", 0.5)
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[1].color", 0.3, 0.6, 0.95, type="double3")  # Azul medio
+        
+        # Posición 2 (arriba) - Cielo oscuro
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[2].position", 1.0)
+        cmds.setAttr(f"{ramp_sky}.colorEntryList[2].color", 0.1, 0.3, 0.7, type="double3")  # Azul oscuro
+        
+        # Conectar ramp al color del skydome
+        cmds.connectAttr(f"{ramp_sky}.outColor", f"{skydome}.color", force=True)
+        
+        print("[✓] SkyDome Light con ramp de cielo creado.")
 
     print("✅ Iluminación configurada correctamente.")
 

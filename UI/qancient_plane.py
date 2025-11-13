@@ -4,7 +4,7 @@ from Utils.emerge import emerge_plane
 from PlaneRig import create_joints, spline_auto_rig
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
-from Materials.materials import aplicar_material_oro
+from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes
 from Materials.lights_setup import setup_lights
 from Materials.select_color import ajustar_color_oro
 from Materials.outline import aplicar_outline_toon, ajustar_grosor_outline, ajustar_color_outline
@@ -162,9 +162,6 @@ def crear_ui():
 
     cmds.setParent("..")
     cmds.setParent("..")
-
-
-
     
     cmds.separator(height=10, style="in")
     
@@ -197,9 +194,16 @@ def crear_ui():
         backgroundColor=[0.3, 0.5, 0.3]
     )
     
+    cmds.button(
+    label="Aplicar Material de Montañas",
+    c=lambda *_: aplicar_material_montanas("terreno"),
+    backgroundColor=[0.2, 0.4, 0.2]
+    )
+
     cmds.separator(height=8, style="single")
-    
+
     cmds.text(label="Campo de Nubes", font="boldLabelFont")
+
     
     # Inputs para nubes
     nubes_cantidad = cmds.intSliderGrp(label="Nubes", min=1, max=100, value=25, field=True)
@@ -218,8 +222,12 @@ def crear_ui():
         backgroundColor=[0.4, 0.6, 0.8]
     )
     
-    cmds.setParent("..")  # Salir columnLayout interno
-    cmds.setParent("..")  # Salir frameLayout
+    # --- Material nubes ---
+    cmds.button(
+    label="Aplicar Material de Nubes",
+    c=lambda *_: aplicar_material_nubes("campo_nubes"),
+    backgroundColor=[0.3, 0.5, 0.7]
+   )
     
     cmds.separator(height=12, style="in")
     
