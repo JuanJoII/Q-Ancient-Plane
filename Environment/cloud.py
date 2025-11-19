@@ -5,7 +5,7 @@ from Utils.soft_edges import soften_edges_en_grupo
 
 def crear_nube(nombre="nube", posicion=(0, 0, 0), escala=5, densidad=10):
     """
-    Crea una nube volumétrica usando esferas agrupadas
+    Crea una nube volumétrica usando cubos biselados agrupados
     """
     grupo_nube = cmds.group(empty=True, name=nombre)
     
@@ -13,14 +13,56 @@ def crear_nube(nombre="nube", posicion=(0, 0, 0), escala=5, densidad=10):
         offset_x = random.uniform(-escala, escala)
         offset_y = random.uniform(-escala * 0.3, escala * 0.3)
         offset_z = random.uniform(-escala * 0.7, escala * 0.7)
-        radio = random.uniform(escala * 0.3, escala * 0.8)
+        tamanio = random.uniform(escala * 0.3, escala * 0.8)
         
-        esfera = cmds.polySphere(r=radio, sx=12, sy=12, name=f"{nombre}_parte_{i}")[0]
+        # Crear cubo en lugar de esfera
+        cubo = cmds.polyCube(
+            w=tamanio, 
+            h=tamanio, 
+            d=tamanio, 
+            sx=1, sy=1, sz=1,
+            name=f"{nombre}_parte_{i}"
+        )[0]
+        
+        # Aplicar bevel a las aristas del cubo
+        try:
+            cmds.polyBevel3(
+                cubo,
+                fraction=0.2,           # Tamaño del bisel (20% del edge)
+                offsetAsFraction=True,
+                autoFit=True,
+                depth=1,
+                mitering=0,             # Sin mitering para bordes más suaves
+                miterAlong=0,
+                chamfer=True,
+                segments=2,             # Segmentos del bisel
+                worldSpace=True,
+                smoothingAngle=30,
+                subdivideNgons=True,
+                mergeVertices=True,
+                mergeVertexTolerance=0.0001,
+                miteringAngle=180,
+                angleTolerance=180,
+                ch=True
+            )
+        except Exception as e:
+            cmds.warning(f"No se pudo aplicar bevel al cubo {cubo}: {e}")
+        
+        # Posicionar el cubo
         cmds.move(posicion[0] + offset_x, 
                  posicion[1] + offset_y, 
                  posicion[2] + offset_z, 
-                 esfera)
-        cmds.parent(esfera, grupo_nube)
+                 cubo)
+        
+        # Rotación aleatoria para más variedad
+        cmds.rotate(
+            random.uniform(0, 360),
+            random.uniform(0, 360),
+            random.uniform(0, 360),
+            cubo
+        )
+        
+        cmds.parent(cubo, grupo_nube)
     
     return grupo_nube
 
@@ -65,7 +107,6 @@ def crear_campo_nubes(num_nubes=10, radio_distribucion=100, altura_min=-18, altu
     print(f"Campo de nubes creado con {num_nubes} nubes. Grupo: '{nombre_grupo}'")
     soften_edges_en_grupo(nombre_grupo, angle=180, keep_history=False)
     return grupo_nubes
-
 
 
 if __name__ == "__main__":

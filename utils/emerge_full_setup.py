@@ -1,5 +1,5 @@
 from Utils.emerge import emerge_plane
-from Materials.lights_setup import setup_lights
+from Lights.lights_setup import setup_lights
 from PlaneRig.create_joints import crear_rig_completo
 from PlaneRig.spline_auto_rig import build_spine_from_core_joints
 from Environment.terrain import crear_terreno_montanoso
