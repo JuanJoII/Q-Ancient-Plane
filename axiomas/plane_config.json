@@ -15,7 +15,7 @@
       {
         "selection_set": "fuselaje_QAP_001_loop_deformacion_Fuselaje_A",
         "escala": [1.3, 1.2, 1],
-        "rango_random": [1.0, 1.8],
+        "rango_random": [0.8, 1.4],
         "ejes": [1, 1, 1],
         "activo": true,
         "descripcion": ""
@@ -28,21 +28,64 @@
     "rotacion": [0, 0, 0],
     "escala": [1.0, 1.0, 1.0],
     "locator_names": ["wing_L_LOC", "wing_R_LOC"],
-    "deformaciones": []
+    "deformaciones": [
+      {
+        "selection_set": "alas_QAP_002_loop_deformacion_alas_B",
+        "escala": [1.2, 1.1, 1.2],
+        "rango_random": [0.5, 1.1],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      },
+      {
+        "selection_set": "alas_QAP_001_loop_deformacion_alas_A",
+        "escala": [1.1, 1, 1.1],
+        "rango_random": [0.8, 1.4],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      }
+    ]
   },
-
+  
   "CABEZA": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
     "escala": [1.0, 1.0, 1.0],
-    "deformaciones": []
+    "deformaciones": [
+      {
+        "selection_set": "cabeza_QAP_001_loop_deformacion_cabeza_A",
+        "escala": [1.3, 1, 1.3],
+        "rango_random": [0.8, 1.5],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      }
+    ]
   },
 
   "COLA": {
     "posicion": [0, 0, 0],
     "rotacion": [0, 0, 0],
     "escala": [1.0, 1.0, 1.0],
-    "deformaciones": []
+    "deformaciones": [
+      {
+        "selection_set": "cola_QAP_002_loop_deformacion_cola_B",
+        "escala": [1.2, 1, 1.2],
+        "rango_random": [0.6, 1.2],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      },
+      {
+        "selection_set": "cola_QAP_001_loop_deformacion_cola_A",
+        "escala": [1.1, 1.2, 1],
+        "rango_random": [0.75, 1],
+        "ejes": [1, 1, 1],
+        "activo": true,
+        "descripcion": ""
+      }
+    ]
   },
 
   "ORNAMENTACION": {
