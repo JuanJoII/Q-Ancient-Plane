@@ -179,3 +179,8 @@ def aplicar_material_nubes(objeto, nombre_material="M_Nubes"):
         cmds.sets(mesh, e=True, forceElement=sg)
 
     print(f"[☁️] Material '{nombre_material}' aplicado a todas las mallas dentro de '{objeto}'.")
+
+if __name__ == '__main__':
+    aplicar_material_oro()
+    aplicar_material_nubes()
+    aplicar_material_montanas()
