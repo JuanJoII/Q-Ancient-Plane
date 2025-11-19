@@ -70,4 +70,3 @@ def crear_campo_nubes(num_nubes=10, radio_distribucion=100, altura_min=-18, altu
 
 if __name__ == "__main__":
     crear_campo_nubes(num_nubes=25)
-    soften_edges_en_grupo("campo_nubes", angle=180, keep_history=False)

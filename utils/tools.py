@@ -2,6 +2,7 @@ import os
 import random
 import maya.cmds as cmds
 from Utils.config import CARPETA_MODELOS, CONFIG
+from Utils.deform import aplicar_deformaciones
 
 
 def obtener_variantes(parte):
@@ -87,4 +88,12 @@ def generar_parte(parte, manejar_locators=True):
     corregir_normales_forzado(grupo)
 
     print(f"[✓] {parte} generado correctamente con forzado aplicado")
+
+    # 🔹 === APLICAR DEFORMACIONES AQUÍ === 🔹
+    try:
+        aplicar_deformaciones(parte, grupo)
+        print(f"[✓] Deformaciones aplicadas a {parte}")
+    except Exception as e:
+        print(f"[!] Error aplicando deformaciones a {parte}: {e}")
+
     return grupo

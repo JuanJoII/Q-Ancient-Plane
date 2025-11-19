@@ -8,6 +8,7 @@ from Materials.materials import aplicar_material_oro, aplicar_material_montanas,
 from Materials.lights_setup import setup_lights
 from Materials.select_color import ajustar_color_oro
 from Materials.outline import aplicar_outline_toon, ajustar_grosor_outline, ajustar_color_outline
+from Utils.emerge_full_setup import emerge_all_scene
 
 
 
@@ -21,19 +22,28 @@ def crear_ui():
         widthHeight=(300, 400),
     )
     
+    cmds.scrollLayout(verticalScrollBarThickness=10, horizontalScrollBarThickness=0)
     cmds.columnLayout(adj=True, rowSpacing=6)
     
     # Título principal
-    cmds.text(label="Modelo Procedural QAP", align="center", height=25, font="boldLabelFont")
+    cmds.text(label="Q'Ancient Plane", align="center", height=50, font="boldLabelFont")
+    
+    cmds.button(label="Emerger Avión", c=lambda *_: emerge_plane())
+    cmds.button(label="Emerger Escena Completa", c=lambda *_: emerge_all_scene())
+    cmds.separator(height=20, style="in")
     
     # --- Sección: Generación de partes ---
+    cmds.frameLayout(label="Generar Partes", collapsable=True, collapse=False, marginWidth=10, marginHeight=8)
+    cmds.columnLayout(adj=True, rowSpacing=5)
+    
     cmds.button(label="Generar Fuselaje", c=lambda *_: generar_parte("FUSELAJE"))
     cmds.button(label="Generar Alas", c=lambda *_: generar_parte("ALAS"))
     cmds.button(label="Generar Cabeza", c=lambda *_: generar_parte("CABEZA"))
     cmds.button(label="Generar Cola", c=lambda *_: generar_parte("COLA"))
     cmds.button(label="Generar Ornamentación", c=lambda *_: generar_parte("ORNAMENTACION"))
-    cmds.button(label="Emerger Avión", c=lambda *_: emerge_plane())
     
+    cmds.setParent("..")  # Salir del columnLayout interno
+    cmds.setParent("..")  # Salir del frameLayout
     cmds.separator(height=10, style="in")
     
     # --- Nueva Sección: Rigging ---
@@ -45,6 +55,7 @@ def crear_ui():
     
     cmds.setParent("..")  # Salir del columnLayout interno
     cmds.setParent("..")  # Salir del frameLayout
+    cmds.separator(height=10, style="in")
 
     # --- Sección Iluminación ---
     cmds.frameLayout(label="Iluminación", collapsable=True, collapse=False, marginWidth=10, marginHeight=8)
@@ -58,6 +69,7 @@ def crear_ui():
     )
     cmds.setParent("..")  
     cmds.setParent("..")  
+    cmds.separator(height=10, style="in")
     
      # --- Sección Materiales ---
     cmds.frameLayout(label="Materiales", collapsable=True, collapse=False, marginWidth=10, marginHeight=8)
