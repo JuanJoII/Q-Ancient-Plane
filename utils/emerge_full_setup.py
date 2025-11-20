@@ -1,3 +1,4 @@
+import maya.cmds as cmds
 from Utils.emerge import emerge_plane
 from Lights.lights_setup import setup_lights
 from PlaneRig.create_joints import crear_rig_completo
@@ -5,8 +6,6 @@ from PlaneRig.spline_auto_rig import build_spine_from_core_joints
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
 from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes
-
-import maya.cmds as cmds
 
 def emerge_all_scene(clear_scene=True):
     if clear_scene:

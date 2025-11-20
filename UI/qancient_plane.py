@@ -1,11 +1,14 @@
 import maya.cmds as cmds
 from Utils.tools import generar_parte
 from Utils.emerge import emerge_plane
-from PlaneRig import create_joints, spline_auto_rig
+from PlaneRig import create_joints, spline_auto_rig, cntrl_curve
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
 from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes, cambiar_color_montanas_aleatorio
 from Materials.select_color import ajustar_color_oro
+from Animation.fly_curve import crear_curva_vuelo
+from Animation.dyn_fly_curve import crear_curva_dinamica
+from Animation.flight_controller import crear_controlador_vuelo, eliminar_vuelo
 from Utils.emerge_full_setup import emerge_all_scene
 
 # === IMPORTAR SISTEMA DE ILUMINACIÓN MODULAR ===
@@ -74,6 +77,7 @@ def crear_ui():
     
     cmds.button(label="Crear Joints", c=lambda *_: create_joints.crear_rig_completo())
     cmds.button(label="Crear Rig Spline", c=lambda *_: spline_auto_rig.build_spine_from_core_joints())
+    cmds.button(label="Crear Curva de Control", c=lambda *_: cntrl_curve.crear_control_avion())
     
     cmds.setParent("..")
     cmds.setParent("..")
@@ -321,6 +325,159 @@ def crear_ui():
     cmds.setParent("..")  # Salir del columnLayout de Escenario
     cmds.setParent("..")  # Salir del frameLayout de Escenario
     
+    # === SECCIÓN ANIMACIÓN DE VUELO ===
+    cmds.frameLayout(label="Animación de Vuelo", collapsable=True, collapse=False, marginWidth=10, marginHeight=8)
+    cmds.columnLayout(adj=True, rowSpacing=7)
+
+    cmds.text(label="Primero crea la curva → Luego anima", font="boldLabelFont", align="left")
+
+    # -------------------------------------------------------------------------
+    # -------------------------- VUELO REALISTA -------------------------------
+    # -------------------------------------------------------------------------
+
+    cmds.frameLayout(label="Vuelo Realista", collapsable=True, collapse=False, marginWidth=8)
+    cmds.columnLayout(adj=True, rowSpacing=5)
+
+    cmds.button(
+        label="Crear Vuelo Realista",
+        height=40,
+        c=lambda *_: (
+            crear_curva_vuelo(
+                nombre="curva_vuelo_actual",
+                radio=65, altura_base=15, variacion_altura=8,
+                num_puntos=80, ondulaciones=4, tipo="circular"
+            ),
+            crear_controlador_vuelo(avion="CTRL_Avion", curva="curva_vuelo_actual", duracion=500)
+        )
+    )
+
+    cmds.separator(h=5, style="in")
+
+    # Opciones avanzadas – Realista
+    cmds.frameLayout(label="Opciones Avanzadas - Vuelo Realista", collapsable=True, collapse=True)
+    cmds.columnLayout(adj=True, rowSpacing=4)
+
+    real_radio = cmds.floatSliderGrp(l="Radio", min=20, max=200, value=65, field=True)
+    real_altura = cmds.floatSliderGrp(l="Altura Base", min=0, max=100, value=15, field=True)
+    real_variacion = cmds.floatSliderGrp(l="Variación Altura", min=0, max=30, value=8, field=True)
+    real_puntos = cmds.intSliderGrp(l="Num Puntos", min=30, max=200, value=80, field=True)
+    real_ondulaciones = cmds.intSliderGrp(l="Ondulaciones", min=0, max=15, value=4, field=True)
+
+    real_tipo = cmds.optionMenu(l="Tipo de Curva")
+    cmds.menuItem(l="Circular")
+    cmds.menuItem(l="Elíptica")
+    cmds.menuItem(l="Aleatorio")
+
+    cmds.button(
+        label="Crear Vuelo Personalizado",
+        c=lambda *_: (
+            crear_curva_vuelo(
+                nombre="curva_vuelo_actual",
+                radio=cmds.floatSliderGrp(real_radio, q=True, v=True),
+                altura_base=cmds.floatSliderGrp(real_altura, q=True, v=True),
+                variacion_altura=cmds.floatSliderGrp(real_variacion, q=True, v=True),
+                num_puntos=cmds.intSliderGrp(real_puntos, q=True, v=True),
+                ondulaciones=cmds.intSliderGrp(real_ondulaciones, q=True, v=True),
+                tipo=cmds.optionMenu(real_tipo, q=True, v=True).lower()
+            ),
+            crear_controlador_vuelo(avion="CTRL_Avion", curva="curva_vuelo_actual", duracion=500)
+        )
+    )
+
+    cmds.setParent('..')  # end Opciones Avanzadas Realista
+    cmds.setParent('..')  # end columnLayout Realista
+    cmds.setParent('..')  # end frameLayout Realista
+
+    cmds.separator(h=12, style="single")
+
+
+    # -------------------------------------------------------------------------
+    # --------------------------- VUELO EXTREMO -------------------------------
+    # -------------------------------------------------------------------------
+
+    cmds.frameLayout(label="Vuelo Extremo", collapsable=True, collapse=False, marginWidth=8)
+    cmds.columnLayout(adj=True, rowSpacing=5)
+
+    cmds.button(
+        label="Crear Vuelo EXTREMO",
+        height=40,
+        c=lambda *_: (
+            crear_curva_dinamica(
+                nombre="curva_vuelo_actual",
+                radio=60, altura_base=20,
+                num_loops=3, num_espirales=2,
+                num_puntos=160, intensidad=1.4
+            ),
+            crear_controlador_vuelo(avion="CTRL_Avion", curva="curva_vuelo_actual", duracion=500)
+        )
+    )
+
+    cmds.separator(h=5, style="in")
+
+    # Opciones avanzadas – Extremo
+    cmds.frameLayout(label="Opciones Avanzadas - Vuelo Extremo", collapsable=True, collapse=True)
+    cmds.columnLayout(adj=True, rowSpacing=4)
+
+    ext_radio = cmds.floatSliderGrp(l="Radio Base", min=30, max=150, value=60, field=True)
+    ext_altura = cmds.floatSliderGrp(l="Altura Base", min=0, max=80, value=20, field=True)
+    ext_loops = cmds.intSliderGrp(l="Num Loops", min=0, max=8, value=3, field=True)
+    ext_espirales = cmds.intSliderGrp(l="Num Espirales", min=0, max=6, value=2, field=True)
+    ext_puntos = cmds.intSliderGrp(l="Num Puntos", min=80, max=300, value=160, field=True)
+    ext_intensidad = cmds.floatSliderGrp(l="Intensidad", min=0.5, max=3.0, value=1.4, step=0.1, field=True)
+
+    cmds.button(
+        label="Crear Vuelo Extremo Personalizado",
+        c=lambda *_: (
+            crear_curva_dinamica(
+                nombre="curva_vuelo_actual",
+                radio=cmds.floatSliderGrp(ext_radio, q=True, v=True),
+                altura_base=cmds.floatSliderGrp(ext_altura, q=True, v=True),
+                num_loops=cmds.intSliderGrp(ext_loops, q=True, v=True),
+                num_espirales=cmds.intSliderGrp(ext_espirales, q=True, v=True),
+                num_puntos=cmds.intSliderGrp(ext_puntos, q=True, v=True),
+                intensidad=cmds.floatSliderGrp(ext_intensidad, q=True, v=True)
+            ),
+            crear_controlador_vuelo(avion="CTRL_Avion", curva="curva_vuelo_actual", duracion=500)
+        )
+    )
+
+    cmds.setParent('..')  # end Opciones Avanzadas Extremo
+    cmds.setParent('..')  # end columnLayout Extremo
+    cmds.setParent('..')  # end frameLayout Extremo
+
+
+    # -------------------------------------------------------------------------
+    # ------------------- CONTROL DE ANIMACIÓN COMÚN --------------------------
+    # -------------------------------------------------------------------------
+
+    cmds.separator(h=15, style="single")
+    cmds.text(label="Control de Animación", font="boldLabelFont", align="left")
+
+    duracion_anim = cmds.intSliderGrp(l="Duración (frames)", min=100, max=3000, value=600, field=True)
+
+    cmds.rowLayout(numberOfColumns=2, columnWidth2=(160, 160))
+    cmds.button(
+        label="Ajustar Animación Actual",
+        height=45,
+        c=lambda *_: crear_controlador_vuelo(
+            avion="CTRL_Avion",
+            curva="curva_vuelo_actual",
+            duracion=cmds.intSliderGrp(duracion_anim, q=True, v=True)
+        )
+    )
+    cmds.button(
+        label="Detener Vuelo",
+        height=45,
+        c=lambda *_: eliminar_vuelo()
+    )
+    cmds.setParent('..')
+
+    cmds.setParent('..')  # end columnLayout principal
+    cmds.setParent('..')  # end frameLayout Animación de Vuelo
+
+    cmds.separator(height=15, style="in")
+
+        
     cmds.showWindow(window)
 
 
