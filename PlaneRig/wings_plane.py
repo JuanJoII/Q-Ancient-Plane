@@ -1,6 +1,41 @@
 import maya.cmds as cmds
 from Utils.config import CONFIG
 
+def crear_control_para_joint(joint, lado):
+    """
+    Crea un control simple (circle) para el joint dado.
+    - Crea un grupo offset
+    - Alinea grupo con el joint
+    - Mete el control dentro del grupo
+    - Conecta con parentConstraint
+    """
+
+    nombre_ctrl = f"CTRL_wing_{lado}_001"
+    nombre_grp = f"GRP_{nombre_ctrl}"
+
+    # Borrar si ya existen
+    for obj in (nombre_ctrl, nombre_grp):
+        if cmds.objExists(obj):
+            cmds.delete(obj)
+
+    # Crear círculo
+    ctrl = cmds.circle(n=nombre_ctrl, normal=[1,0,0], radius=3)[0]
+
+    # Crear grupo offset
+    grp = cmds.group(ctrl, n=nombre_grp)
+
+    # Mover el grupo al joint
+    cmds.delete(cmds.pointConstraint(joint, grp))
+    cmds.delete(cmds.orientConstraint(joint, grp))
+
+    # Constrain del control al joint
+    cmds.parentConstraint(ctrl, joint, mo=False)
+
+    print(f"[✓] Control '{nombre_ctrl}' creado para el joint '{joint}'")
+
+    return {"ctrl": ctrl, "grp": grp}
+
+
 def crear_wing_joints():
     """
     Crea los joints de las alas (wing_joint_L_001, wing_joint_R_001)
@@ -27,7 +62,7 @@ def crear_wing_joints():
         print(f"[!] No se encontró ningún locator que coincida con {locator_patterns}")
         return joints_creados
 
-    # Ordenar los locators por su coordenada X para determinar lados
+    # Ordenar locators por X
     pos_x = {}
     for loc in todos_candidatos:
         try:
@@ -43,7 +78,6 @@ def crear_wing_joints():
         mapping = {"L": left_loc, "R": right_loc}
         print(f"[i] Locators detectados por posición: L='{left_loc}', R='{right_loc}'")
     else:
-        # solo un locator, asignar según su X vs fuselaje
         loc = list(pos_x.keys())[0]
         x = pos_x[loc]
         fus_x = 0.0
@@ -55,9 +89,9 @@ def crear_wing_joints():
                 pass
         lado = "L" if x < fus_x else "R"
         mapping = {lado: loc}
-        print(f"[i] Un solo locator detectado ('{loc}'). Asignado a lado '{lado}' (x={x:.3f}, fuselaje_x={fus_x:.3f})")
+        print(f"[i] Un solo locator detectado ('{loc}'). Asignado a lado '{lado}'")
 
-    # Crear joints según mapping
+    # Crear joints y controles
     for lado, loc_name in mapping.items():
         try:
             pos = cmds.xform(loc_name, q=True, t=True, ws=True)
@@ -71,6 +105,8 @@ def crear_wing_joints():
 
         cmds.select(clear=True)
         joint = cmds.joint(name=nombre_joint, position=pos, absolute=True)
+
+        # Parent al fuselaje
         if cmds.objExists("core_plane_joint_002"):
             try:
                 cmds.parent(joint, "core_plane_joint_002")
@@ -78,6 +114,17 @@ def crear_wing_joints():
                 print(f"[!] No se pudo parentar {joint} al fuselaje: {e}")
 
         print(f"[✓] Joint de ala {lado} creado en {pos} (desde locator '{loc_name}')")
-        joints_creados[f"ALA_{lado}"] = joint
+
+        # Crear control para este joint
+        ctrl_info = crear_control_para_joint(joint, lado)
+
+        joints_creados[f"ALA_{lado}"] = {
+            "joint": joint,
+            "control": ctrl_info["ctrl"],
+            "grupo": ctrl_info["grp"],
+        }
 
     return joints_creados
+
+if __name__ == '__main__':
+    crear_wing_joints()

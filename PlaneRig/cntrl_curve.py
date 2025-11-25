@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+from PlaneRig.master_conect import conectar_spine_al_master
 
 def crear_control_avion():
     partes_avion = [
@@ -6,7 +7,7 @@ def crear_control_avion():
         "ALAS_GENERADO",
         "COLA_GENERADO",
         "CABEZA_GENERADO",
-        "ORNAMENTACION_GENERADO"
+        "ORNAMENTACION_GENERADO",
     ]
 
     partes_existentes = [p for p in partes_avion if cmds.objExists(p)]
@@ -42,9 +43,11 @@ def crear_control_avion():
 
     cmds.makeIdentity(control, apply=True, translate=True, rotate=True, scale=True)
 
-    # Constraints
     for parte in partes_existentes:
         cmds.parentConstraint(control, parte, mo=True)
+
+    # Conectar los spine al master
+    conectar_spine_al_master(master=control)
 
     cmds.select(control)
     print("Control creado, transformaciones en cero y asignado correctamente.")
