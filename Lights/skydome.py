@@ -24,10 +24,10 @@ def crear_skydome_con_variaciones():
         cmds.warning("Arnold no está cargado. No se puede crear SkyDome.")
         return None
     
-    # Si ya existe, usar el existente
+    # Si ya existe, eliminarlo completamente primero
     if cmds.objExists(SKYDOME_NAME):
-        print(f"[i] SkyDome '{SKYDOME_NAME}' ya existe. Usando el existente.")
-        return SKYDOME_NAME
+        print(f"[i] SkyDome '{SKYDOME_NAME}' ya existe. Eliminando para recrear...")
+        _eliminar_skydome_completo()
     
     # Crear SkyDome Light
     skydome = cmds.shadingNode('aiSkyDomeLight', asLight=True, name=SKYDOME_NAME)
@@ -45,6 +45,10 @@ def _crear_ramp_cielo():
     Crea el ramp de textura para el skydome y lo conecta.
     Configura colores por defecto de cielo diurno.
     """
+    # Si el ramp ya existe, eliminarlo primero
+    if cmds.objExists(RAMP_NAME):
+        cmds.delete(RAMP_NAME)
+    
     ramp_sky = cmds.shadingNode("ramp", asTexture=True, name=RAMP_NAME)
     
     # Configurar como V Ramp (vertical)
@@ -58,13 +62,48 @@ def _crear_ramp_cielo():
     cmds.connectAttr(f"{ramp_sky}.outColor", f"{SKYDOME_NAME}.color", force=True)
 
 
+def _eliminar_skydome_completo():
+    """
+    Elimina completamente el skydome y todos sus nodos asociados (ramp, place2dTexture, etc.)
+    """
+    elementos_a_eliminar = []
+    
+    # Agregar el skydome si existe
+    if cmds.objExists(SKYDOME_NAME):
+        elementos_a_eliminar.append(SKYDOME_NAME)
+    
+    # Agregar el ramp si existe
+    if cmds.objExists(RAMP_NAME):
+        elementos_a_eliminar.append(RAMP_NAME)
+        
+        # También eliminar el place2dTexture conectado al ramp
+        conexiones = cmds.listConnections(RAMP_NAME, source=True, destination=False)
+        if conexiones:
+            for conn in conexiones:
+                if cmds.nodeType(conn) == "place2dTexture":
+                    elementos_a_eliminar.append(conn)
+    
+    # Eliminar todos los elementos encontrados
+    if elementos_a_eliminar:
+        try:
+            cmds.delete(elementos_a_eliminar)
+            print(f"[✓] Elementos eliminados: {', '.join(elementos_a_eliminar)}")
+        except Exception as e:
+            cmds.warning(f"Error al eliminar elementos del skydome: {e}")
+
+
 def cambiar_cielo_aleatorio():
     """
     Cambia el cielo a una paleta aleatoria.
+    Crea el skydome si no existe.
     
     Returns:
         str: Nombre de la paleta aplicada o None si falla
     """
+    # Si no existe, crearlo primero
+    if not cmds.objExists(SKYDOME_NAME):
+        crear_skydome_con_variaciones()
+    
     if not _verificar_skydome_existe():
         return None
     
@@ -83,6 +122,7 @@ def cambiar_cielo_aleatorio():
 def aplicar_cielo_especifico(tipo_cielo):
     """
     Aplica un tipo de cielo específico por nombre.
+    Crea el skydome si no existe.
     
     Args:
         tipo_cielo (str): Tipo de cielo a aplicar. Opciones:
@@ -92,6 +132,10 @@ def aplicar_cielo_especifico(tipo_cielo):
     Returns:
         bool: True si se aplicó correctamente, False si falló
     """
+    # Si no existe, crearlo primero
+    if not cmds.objExists(SKYDOME_NAME):
+        crear_skydome_con_variaciones()
+    
     if not _verificar_skydome_existe():
         return False
     
