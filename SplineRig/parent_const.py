@@ -13,7 +13,7 @@ def constrain_joints_to_targets(
         tgt = f"{target_base}_{i + 1:03d}"
         if not cmds.objExists(jnt) or not cmds.objExists(tgt):
             continue
-        cmds.parentConstraint(tgt, jnt, maintainOffset=True)
+        cmds.parentConstraint(tgt, jnt, maintainOffset=False)
         print(f"✅ ParentConstraint: {jnt} ← {tgt}")
 
 
