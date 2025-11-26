@@ -40,7 +40,7 @@ def aplicar_material_oro(objeto, nombre_material="M_Gold"):
 
 def aplicar_material_montanas(objeto, nombre_material="M_Montanas_Metalico"):
     """
-    Crea un material aiStandardSurface METÁLICO con variación de color y contraste.
+    Crea un material aiStandardSurface METÁLICO con variación de color y contraste AUMENTADO.
     """
     if not cmds.objExists(objeto):
         cmds.warning(f"El objeto '{objeto}' no existe.")
@@ -53,69 +53,80 @@ def aplicar_material_montanas(objeto, nombre_material="M_Montanas_Metalico"):
         cmds.connectAttr(shader + ".outColor", sg + ".surfaceShader", force=True)
 
         # === PROPIEDADES METÁLICAS ===
-        cmds.setAttr(shader + ".metalness", 0.9)  # ALTO metalness para look metálico
+        cmds.setAttr(shader + ".metalness", 0.9)
         cmds.setAttr(shader + ".specular", 1.0)
-        cmds.setAttr(shader + ".specularRoughness", 0.3)  # Reflejo más definido
+        cmds.setAttr(shader + ".specularRoughness", 0.3)
         cmds.setAttr(shader + ".specularIOR", 1.5)
 
-        # === Ramp de color base (metálico con variaciones) ===
+        # === Ramp de color base con MÁS CONTRASTE ===
         ramp = cmds.shadingNode("ramp", asTexture=True, name=nombre_material + "_ramp")
         place2d = cmds.shadingNode("place2dTexture", asUtility=True, name=nombre_material + "_place2d")
         cmds.connectAttr(place2d + ".outUV", ramp + ".uvCoord")
 
         cmds.setAttr(ramp + ".type", 1)  # Circular
-        # Colores metálicos por defecto (bronce/cobre oscuro)
-        cmds.setAttr(ramp + ".colorEntryList[0].color", 0.15, 0.12, 0.08, type="double3")  # Oscuro
+        
+        # COLORES MÁS CONTRASTANTES (oscuro casi negro → bronce claro)
+        cmds.setAttr(ramp + ".colorEntryList[0].color", 0.05, 0.03, 0.02, type="double3")  # Casi negro
         cmds.setAttr(ramp + ".colorEntryList[0].position", 0.0)
-        cmds.setAttr(ramp + ".colorEntryList[1].color", 0.4, 0.3, 0.2, type="double3")      # Medio
+        cmds.setAttr(ramp + ".colorEntryList[1].color", 0.55, 0.35, 0.15, type="double3")  # Bronce medio
         cmds.setAttr(ramp + ".colorEntryList[1].position", 0.5)
-        cmds.setAttr(ramp + ".colorEntryList[2].color", 0.6, 0.5, 0.35, type="double3")     # Claro
+        cmds.setAttr(ramp + ".colorEntryList[2].color", 0.85, 0.65, 0.45, type="double3")  # Bronce claro
         cmds.setAttr(ramp + ".colorEntryList[2].position", 1.0)
 
-        # === Ruido para textura metálica ===
+        # === Ruido para textura metálica (más pronunciado) ===
         noise = cmds.shadingNode("aiNoise", asTexture=True, name=nombre_material + "_noise")
         cmds.setAttr(noise + ".scaleX", 5)
         cmds.setAttr(noise + ".scaleY", 5)
         cmds.setAttr(noise + ".scaleZ", 5)
         cmds.setAttr(noise + ".octaves", 6)
-        cmds.setAttr(noise + ".amplitude", 0.8)
-        cmds.setAttr(noise + ".distortion", 0.3)
+        cmds.setAttr(noise + ".amplitude", 1.2)  # AUMENTADO de 0.8 a 1.2
+        cmds.setAttr(noise + ".distortion", 0.5)  # AUMENTADO de 0.3 a 0.5
 
-        # === Fractal para detalles adicionales (contraste) ===
+        # === Fractal para detalles adicionales (MÁS contraste) ===
         fractal = cmds.shadingNode("aiNoise", asTexture=True, name=nombre_material + "_fractal")
         cmds.setAttr(fractal + ".scaleX", 15)
         cmds.setAttr(fractal + ".scaleY", 15)
         cmds.setAttr(fractal + ".scaleZ", 15)
-        cmds.setAttr(fractal + ".octaves", 4)
-        cmds.setAttr(fractal + ".amplitude", 0.5)
+        cmds.setAttr(fractal + ".octaves", 5)  # AUMENTADO de 4 a 5
+        cmds.setAttr(fractal + ".amplitude", 0.8)  # AUMENTADO de 0.5 a 0.8
 
-        # Mezclar ruido + fractal para más contraste
+        # Mezclar ruido + fractal
         layered = cmds.shadingNode("layeredTexture", asTexture=True, name=nombre_material + "_layered")
         cmds.connectAttr(noise + ".outColor", layered + ".inputs[0].color")
         cmds.connectAttr(fractal + ".outColor", layered + ".inputs[1].color")
-        cmds.setAttr(layered + ".inputs[1].blendMode", 6)  # Multiply para contraste
+        cmds.setAttr(layered + ".inputs[1].blendMode", 6)  # Multiply
 
         # Multiplicar ramp por textura procedural
         multiply = cmds.shadingNode("multiplyDivide", asUtility=True, name=nombre_material + "_multiply")
         cmds.connectAttr(ramp + ".outColor", multiply + ".input1")
         cmds.connectAttr(layered + ".outColor", multiply + ".input2")
+        cmds.setAttr(multiply + ".operation", 1)  # Multiply
 
-        # === Ambient Occlusion para sombras en crevices ===
+        # === Ambient Occlusion REDUCIDO para no oscurecer tanto ===
         ao = cmds.shadingNode("aiAmbientOcclusion", asShader=True, name=nombre_material + "_AO")
         cmds.setAttr(ao + ".samples", 20)
         cmds.setAttr(ao + ".spread", 0.9)
         cmds.setAttr(ao + ".falloff", 0.8)
 
-        # Mezclar color con AO
+        # Mezclar color con AO (REDUCIDO de 0.35 a 0.20 para menos oscurecimiento)
         mix_ao = cmds.shadingNode("blendColors", asUtility=True, name=nombre_material + "_mixAO")
         cmds.connectAttr(multiply + ".output", mix_ao + ".color1")
         cmds.connectAttr(ao + ".outColor", mix_ao + ".color2")
-        cmds.setAttr(mix_ao + ".blender", 0.35)
+        cmds.setAttr(mix_ao + ".blender", 0.20)  # REDUCIDO para mayor claridad
+
+        # === NODO ADICIONAL: ColorCorrect para aumentar contraste final ===
+        color_correct = cmds.shadingNode("aiColorCorrect", asUtility=True, name=nombre_material + "_colorCorrect")
+        cmds.connectAttr(mix_ao + ".output", color_correct + ".input")
+        cmds.setAttr(color_correct + ".gamma", 0.85)  # Más contraste
+        cmds.setAttr(color_correct + ".hueShift", 0.0)
+        cmds.setAttr(color_correct + ".saturation", 1.3)  # MÁS saturación
+        cmds.setAttr(color_correct + ".contrast", 1.4)  # MÁS contraste
+        cmds.setAttr(color_correct + ".exposure", 0.2)  # Ligeramente más brillante
 
         # Conectar al material
-        cmds.connectAttr(mix_ao + ".output", shader + ".baseColor")
+        cmds.connectAttr(color_correct + ".outColor", shader + ".baseColor")
 
-        # === Roughness variation para brillo variable ===
+        # === Roughness variation MAYOR para más variación de brillo ===
         roughness_noise = cmds.shadingNode("aiNoise", asTexture=True, name=nombre_material + "_roughness")
         cmds.setAttr(roughness_noise + ".scaleX", 8)
         cmds.setAttr(roughness_noise + ".scaleY", 8)
@@ -126,15 +137,15 @@ def aplicar_material_montanas(objeto, nombre_material="M_Montanas_Metalico"):
         cmds.connectAttr(roughness_noise + ".outColorR", remap + ".inputValue")
         cmds.setAttr(remap + ".inputMin", 0.0)
         cmds.setAttr(remap + ".inputMax", 1.0)
-        cmds.setAttr(remap + ".outputMin", 0.2)
-        cmds.setAttr(remap + ".outputMax", 0.5)
+        cmds.setAttr(remap + ".outputMin", 0.15)  # REDUCIDO de 0.2 (más brillo)
+        cmds.setAttr(remap + ".outputMax", 0.6)   # AUMENTADO de 0.5 (más mate)
         cmds.connectAttr(remap + ".outValue", shader + ".specularRoughness")
 
-        # === Displacement para relieve ===
+        # === Displacement para relieve (AUMENTADO) ===
         displace = cmds.shadingNode("displacementShader", asShader=True, name=nombre_material + "_disp")
         cmds.connectAttr(noise + ".outColorR", displace + ".displacement")
         cmds.connectAttr(displace + ".displacement", sg + ".displacementShader", force=True)
-        cmds.setAttr(displace + ".scale", 0.5)
+        cmds.setAttr(displace + ".scale", 0.7)  # AUMENTADO de 0.5 a 0.7
     
     # === Asignar el material a la geometría ===
     sg = nombre_material + "SG"
@@ -151,48 +162,102 @@ def aplicar_material_montanas(objeto, nombre_material="M_Montanas_Metalico"):
     for mesh in meshes:
         cmds.sets(mesh, e=True, forceElement=sg)
 
-    print(f"[✓] Material metálico de montañas aplicado a '{objeto}'.")
+    print(f"[✓] Material metálico de montañas con MAYOR CONTRASTE aplicado a '{objeto}'.")
 
 
 def cambiar_color_montanas_aleatorio(nombre_material="M_Montanas_Metalico"):
     """
     Cambia el color del material de las montañas de forma aleatoria entre paletas metálicas.
+    Versión MEJORADA con colores más contrastantes y saturados.
     """
+    import random
+    
     if not cmds.objExists(nombre_material):
         cmds.warning(f"El material '{nombre_material}' no existe. Crea el material primero.")
         return
     
-    # Paletas de colores metálicos predefinidas
+    # Paletas de colores metálicos con MÁS CONTRASTE (oscuro → medio → muy claro)
     paletas = [
-        # Cobre/Bronce
-        [(0.15, 0.12, 0.08), (0.4, 0.3, 0.2), (0.6, 0.5, 0.35)],
-        # Hierro/Acero
-        [(0.15, 0.15, 0.18), (0.35, 0.35, 0.40), (0.55, 0.55, 0.60)],
-        # Oro Viejo
-        [(0.25, 0.20, 0.08), (0.50, 0.42, 0.18), (0.70, 0.60, 0.30)],
-        # Plata Oscura
-        [(0.20, 0.22, 0.25), (0.45, 0.48, 0.52), (0.65, 0.68, 0.72)],
-        # Bronce Verde (oxidado)
-        [(0.12, 0.18, 0.15), (0.25, 0.40, 0.32), (0.40, 0.55, 0.45)],
-        # Titanio
-        [(0.18, 0.18, 0.20), (0.38, 0.38, 0.42), (0.58, 0.58, 0.65)],
-        # Cobre Rojizo
-        [(0.20, 0.10, 0.08), (0.45, 0.22, 0.15), (0.65, 0.35, 0.25)],
+        # Cobre/Bronce (mejorado)
+        [(0.05, 0.03, 0.02), (0.55, 0.35, 0.15), (0.85, 0.65, 0.45)],
+        # Hierro/Acero (mejorado)
+        [(0.08, 0.08, 0.10), (0.40, 0.40, 0.45), (0.75, 0.75, 0.80)],
+        # Oro Viejo (mejorado)
+        [(0.10, 0.08, 0.02), (0.60, 0.50, 0.20), (0.90, 0.80, 0.50)],
+        # Plata Oscura (mejorado)
+        [(0.10, 0.12, 0.15), (0.50, 0.53, 0.58), (0.85, 0.88, 0.92)],
+        # Bronce Verde oxidado (mejorado)
+        [(0.05, 0.10, 0.08), (0.30, 0.50, 0.40), (0.55, 0.75, 0.65)],
+        # Titanio (mejorado)
+        [(0.10, 0.10, 0.12), (0.45, 0.45, 0.50), (0.78, 0.78, 0.85)],
+        # Cobre Rojizo (mejorado)
+        [(0.10, 0.05, 0.03), (0.55, 0.25, 0.18), (0.85, 0.50, 0.40)],
+        # Oro Rosa (NUEVO)
+        [(0.15, 0.08, 0.10), (0.65, 0.40, 0.45), (0.92, 0.70, 0.75)],
+        # Hierro Oxidado (NUEVO)
+        [(0.12, 0.08, 0.05), (0.45, 0.30, 0.20), (0.70, 0.50, 0.35)],
+        # Platino (NUEVO)
+        [(0.15, 0.15, 0.16), (0.55, 0.55, 0.58), (0.88, 0.88, 0.90)],
     ]
     
     # Seleccionar paleta aleatoria
     paleta = random.choice(paletas)
     
+    # Identificar el nombre de la paleta para debug
+    nombres_paletas = [
+        "Cobre/Bronce", "Hierro/Acero", "Oro Viejo", "Plata Oscura",
+        "Bronce Verde", "Titanio", "Cobre Rojizo", "Oro Rosa",
+        "Hierro Oxidado", "Platino"
+    ]
+    nombre_paleta = nombres_paletas[paletas.index(paleta)]
+    
+    # Buscar el ramp node
     ramp_name = nombre_material + "_ramp"
-    if cmds.objExists(ramp_name):
-        cmds.setAttr(ramp_name + ".colorEntryList[0].color", *paleta[0], type="double3")
-        cmds.setAttr(ramp_name + ".colorEntryList[1].color", *paleta[1], type="double3")
-        cmds.setAttr(ramp_name + ".colorEntryList[2].color", *paleta[2], type="double3")
-        
-        print(f"[✓] Color de montañas cambiado aleatoriamente a paleta metálica.")
-    else:
-        cmds.warning(f"No se encontró el ramp '{ramp_name}'.")
+    if not cmds.objExists(ramp_name):
+        cmds.warning(f"No se encontró el nodo ramp '{ramp_name}'.")
+        return
+    
+    # Aplicar los colores de la paleta al ramp
+    cmds.setAttr(ramp_name + ".colorEntryList[0].color", *paleta[0], type="double3")
+    cmds.setAttr(ramp_name + ".colorEntryList[1].color", *paleta[1], type="double3")
+    cmds.setAttr(ramp_name + ".colorEntryList[2].color", *paleta[2], type="double3")
+    
+    print(f"[✓] Color de montañas cambiado a: {nombre_paleta}")
+    print(f"    Oscuro: RGB{paleta[0]}")
+    print(f"    Medio:  RGB{paleta[1]}")
+    print(f"    Claro:  RGB{paleta[2]}")
 
+
+def cambiar_color_montanas_custom(nombre_material="M_Montanas_Metalico", 
+                                   color_oscuro=(0.05, 0.03, 0.02),
+                                   color_medio=(0.55, 0.35, 0.15),
+                                   color_claro=(0.85, 0.65, 0.45)):
+    """
+    Cambia el color del material de las montañas usando colores personalizados.
+    
+    Args:
+        nombre_material: Nombre del material a modificar
+        color_oscuro: RGB tuple para zonas oscuras (0-1)
+        color_medio: RGB tuple para zonas medias (0-1)
+        color_claro: RGB tuple para zonas claras (0-1)
+    """
+    if not cmds.objExists(nombre_material):
+        cmds.warning(f"El material '{nombre_material}' no existe.")
+        return
+    
+    ramp_name = nombre_material + "_ramp"
+    if not cmds.objExists(ramp_name):
+        cmds.warning(f"No se encontró el nodo ramp '{ramp_name}'.")
+        return
+    
+    cmds.setAttr(ramp_name + ".colorEntryList[0].color", *color_oscuro, type="double3")
+    cmds.setAttr(ramp_name + ".colorEntryList[1].color", *color_medio, type="double3")
+    cmds.setAttr(ramp_name + ".colorEntryList[2].color", *color_claro, type="double3")
+    
+    print(f"[✓] Colores personalizados aplicados:")
+    print(f"    Oscuro: RGB{color_oscuro}")
+    print(f"    Medio:  RGB{color_medio}")
+    print(f"    Claro:  RGB{color_claro}")
 
 def aplicar_material_nubes(objeto, nombre_material="M_Nubes_Metalico"):
     """

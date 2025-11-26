@@ -285,7 +285,7 @@ def crear_ui():
     
     # === TERRENO ===
     cmds.text(label="Terreno Montañoso", font="boldLabelFont", height=22)
-    
+
     cmds.button(
         label="Generar Terreno",
         c=lambda *_: generar_terreno_con_material(
@@ -295,12 +295,13 @@ def crear_ui():
         backgroundColor=[0.25, 0.45, 0.35],
         height=35
     )
-    
+
     cmds.button(
-        label="🎨 Color Metálico Aleatorio",
-        c=lambda *_: cambiar_color_montanas_aleatorio(),
-        backgroundColor=[0.45, 0.30, 0.55],
-        height=32
+    label="🎲 Color Metálico Aleatorio",
+    c=lambda *_: cambiar_color_montanas_aleatorio(),
+    backgroundColor=[0.45, 0.30, 0.55],
+    height=32,
+    annotation="Cambia el color de las montañas entre 10 paletas metálicas diferentes"
     )
     
     # Opciones avanzadas terreno
