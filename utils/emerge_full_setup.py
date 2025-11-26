@@ -1,8 +1,7 @@
 import maya.cmds as cmds
 from Utils.emerge import emerge_plane
 from Lights.lights_setup import setup_lights
-from PlaneRig.create_joints import crear_rig_completo
-from PlaneRig.spline_auto_rig import build_spine_from_core_joints
+from UI.qancient_plane import crear_rig_completo
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
 from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes
@@ -20,7 +19,6 @@ def emerge_all_scene(clear_scene=True):
     emerge_plane()
     setup_lights()
     crear_rig_completo()
-    build_spine_from_core_joints()
     crear_terreno_montanoso()
     crear_campo_nubes(num_nubes=25)
     
