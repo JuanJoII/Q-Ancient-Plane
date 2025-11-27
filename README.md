@@ -1,122 +1,98 @@
-# 🏗️ Maya + VSCode: Entorno de Desarrollo en Python
-Este entorno permite escribir y ejecutar código Python para **Autodesk Maya** directamente desde **Visual Studio Code (VSCode)**, aprovechando las ventajas de **[uv](https://github.com/astral-sh/uv)** para la gestión de dependencias y entornos virtuales.
+# Q'Ancient Plane
 
----
+[![Maya 2022+](https://img.shields.io/badge/Maya-%202023%20%7C%202024%20%7C%202025-blue?logo=autodesk)](https://www.autodesk.com/products/maya/overview)
+[![Python 3.13+](https://img.shields.io/badge/Python-3.13%2B-blue?logo=python)](https://www.python.org/)
+[![uv](https://img.shields.io/badge/uv-0.8.22-blue?logo=astral&logoColor=white)](https://docs.astral.sh/uv/)
 
-## 🚀 Requisitos Previos
-Asegúrate de tener instalado:
-- [Python](https://www.python.org/downloads/) (misma versión que usa Maya)
-- [VSCode](https://code.visualstudio.com/)
-- [pipx](https://pypa.github.io/pipx/) (recomendado para instalar herramientas aisladas)
 
----
 
-## 1️⃣ Instalación de `uv`
-[uv](https://github.com/astral-sh/uv) es una herramienta moderna para manejar entornos Python de forma **rápida** y **eficiente**.
 
-Instálalo con:
-```bash
-pipx install uv
-````
+**Q'Ancient Plane** es un toolkit completo para Autodesk Maya que permite generar de forma procedural, riggear, texturizar y animar escenas inspiradas en los famosos avioncitos precolombinos de la cultura Quimbaya (los “avioncitos de oro”). Todo el flujo se controla desde una interfaz intuitiva dentro de Maya, logrando escenas únicas con tan solo unos clics.
 
----
+![Screen Shot 1](ReadmeImages/QAP_SS_001.png)  
 
-## 2️⃣ (Opcional) Instalación de `ruff`
+![Screen Shot 2](ReadmeImages/QAP_SS_002.png)  
 
-[ruff](https://github.com/astral-sh/ruff) es un linter y formateador de código extremadamente rápido, útil para mantener un estilo consistente.
+## ✨ Características principales
 
-Puedes instalarlo de dos maneras:
+- **Generación procedural del avión**: Importa y ensambla piezas (fuselaje, alas, cabeza, etc.) con deformaciones procedurales para resultados únicos en cada generación.
+- **Rigging automático**: Crea un rig Spline IK completo con controles listos para animación.
+- **Entorno procedural**: Terrenos montañosos extensos y nubes volumétricas estilizadas.
+- **Materiales avanzados**: Shaders metálicos procedurales (oro, plata, cobre…) con Arnold `aiStandardSurface`.
+- **Iluminación profesional**: Sistema de 3 puntos + SkyDome Arnold totalmente configurable (día, atardecer, noche, tormenta…).
+- **Sistema de animación de vuelo**: Trayectorias suaves, circulares o acrobáticas con animación automática del avión.
+- **Interfaz todo-en-uno**: Control total desde una única ventana dentro de Maya.
 
-```bash
-# Con uvx (recomendado si ya usas uv)
-uvx install ruff
+## 🎮 Interfaz principal
 
-# O con pipx
-pipx install ruff
+- **`🌟 Generar Escena Completa`**: ¡Un solo clic! Crea avión + rig + terreno + nubes + materiales + iluminación.
+- **`✈️ Generar Solo Avión`**: Solo el avión con materiales (ideal para pruebas rápidas).
+- **Controles avanzados**: Cada sección (Color, Rigging, Iluminación, Escenario, Animación) es expandible para ajustes finos.
+
+## Estructura del proyecto
+
+```
+Q-Ancient-Plane/
+├── UI/               → Interfaz gráfica principal (qancient_plane.py)
+├── Utils/            → Lógica central: importación, deformaciones, escena completa
+├── PlaneRig/         → Rigging del cuerpo y alas
+├── SplineRig/        → Rig flexible basado en spline
+├── Environment/      → Terreno y nubes procedurales
+├── Materials/        → Shaders Arnold metálicos y ambientales
+├── Lights/           → Iluminación 3 puntos + SkyDome con presets
+├── Animation/        → Curvas de vuelo y controlador de animación
+├── axiomas/          → plane_config.json (parámetros procedurales)
+└── send2maya.py      → Envío de código desde VSCode a Maya
 ```
 
----
+## 🛠 Configuración para desarrolladores (Maya + VSCode)
 
-## 3️⃣ Configurar la versión de Python de Maya
+Este repositorio está preparado para un flujo profesional: escribir y enviar código desde VSCode directamente a una sesión de Maya en ejecución.
 
-Maya utiliza su propia versión de Python. Para verificarla, abre la **Consola de Python** dentro de Maya y ejecuta:
+### Requisitos
+- Python coincidente con la versión de Maya
+- Visual Studio Code
+- `uv` (instalador rápido de paquetes): `pip install uv`
 
-```python
-import sys
-print(sys.version)
-```
+### Pasos de configuración
 
-Con esa versión:
-
-* Edita el archivo **`pyproject.toml`** y el archivo **`.python-version`** del proyecto para que coincidan con la versión de Python que usa Maya.
-* Esto permite a `uv` crear un entorno compatible.
-
----
-
-## 4️⃣ Configuración de `userSetup.py`
-
-Para que VSCode pueda enviar el código a Maya, es necesario habilitar un **puerto de escucha** en Maya.
-
-1. Dirígete a:
-
+1. **Comprueba la versión de Python de Maya**  
+   ```python
+   import sys; print(sys.version)
    ```
-   C:\Users\<TU_USUARIO>\Documents\maya\<VERSION_DE_MAYA>\scripts
+
+2. **Actualiza la versión de Python del proyecto**  
+   Modifica `requires-python` en `pyproject.toml` y el archivo `.python-version`.
+
+3. **Crea el entorno virtual**  
+   ```bash
+   uv sync
    ```
-2. Verifica si existe un archivo llamado **`userSetup.py`**.
+   Se creará `.venv` con los stubs de Maya para autocompletado.
 
-   * Si **no existe**, créalo.
-3. Agrega el siguiente código (actualiza la ruta del proyecto):
+4. **Configura `userSetup.py` en Maya**  
+   Ruta: `C:\Users\<TU_USUARIO>\Documents\maya\<VERSIÓN>\scripts\userSetup.py`
 
-```python
-import maya.cmds as cmds
-import sys
+   ```python
+   import maya.cmds as cmds
+   import sys
 
-# Agregar la ruta del proyecto para importar módulos propios
-sys.path.append(r"ruta\del\proyecto")
+   repo_path = r"C:\ruta\a\tu\Q-Ancient-Plane"
+   if repo_path not in sys.path:
+       sys.path.append(repo_path)
 
-# Abrir el puerto para comunicación con VSCode
-if not cmds.commandPort(":4434", query=True):
-    cmds.commandPort(name=":4434")
-```
+   # Abrir puerto de comandos para VSCode
+   if not cmds.commandPort(":4434", query=True):
+       cmds.commandPort(name=":4434")
+   ```
 
-💡 **Tip:** Usa doble barra `\\` o prefijo `r""` para las rutas en Windows.
+5. **¡Ejecuta desde VSCode!**  
+   Abre cualquier archivo `.py` del proyecto → `Ctrl + Shift + B` → el código se envía y ejecuta en Maya automáticamente.
 
----
-
-## ⚠️ Archivo crítico: `send2maya.py`
-
-El archivo **`send2maya.py`** es el núcleo de la comunicación entre VSCode y Maya.
-Este archivo:
-
-* Envía el código a Maya.
-* Gestiona la conexión del socket.
-* Controla la ejecución del proyecto.
-
-⚠️ **No modifiques este archivo bajo ninguna circunstancia.**
-Cualquier cambio podría romper la conexión y el flujo de trabajo.
+- Para más detalles acerca del setup del vsCode con maya mira este repositorio 👉 https://github.com/JuanJoII/vscode-environment-for-maya
 
 ---
 
-## 5️⃣ Ejecución del código desde VSCode
+**¡Crea tus propios avioncitos Quimbaya voladores en minutos!** ✈️🗿
 
-Con todo configurado, ya puedes ejecutar código en Maya:
-
-1. Abre en VSCode el archivo que deseas correr (para probar la conexión hay un fichero de prueba que crea una esfera y un cubo, este archivo es `test.py`).
-2. Presiona **`Ctrl + Shift + B`**.
-3. El archivo se enviará automáticamente a Maya a través del puerto configurado.
-
-El archivo `tasks.json` incluido en el proyecto ya está preparado para manejar esta tarea.
-
----
-
-## ✅ Resumen de Flujo de Trabajo
-
-1. Instala **uv** y (opcional) **ruff**.
-2. Ajusta `pyproject.toml` y `.python-version` a la versión de Python de Maya.
-3. Configura `userSetup.py` para abrir el puerto y añadir la ruta del proyecto.
-4. **No toques `send2maya.py`.**
-5. Usa **Ctrl + Shift + B** en VSCode para ejecutar el código en Maya, en consola deberia aparecer algo así:
-
-```
-✅ Ejecutado en Maya con UTF-8: C:/ruta/del/proyecto/main.py
-```
+¿Te animas a probarlo? ¡Deja una estrella ⭐ si te gusta!
