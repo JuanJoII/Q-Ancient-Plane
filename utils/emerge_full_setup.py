@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 from Utils.emerge import emerge_plane
 from Lights.lights_setup import setup_lights
-from UI.qancient_plane import crear_rig_completo
+from PlaneRig.full_rig import crear_rig_completo
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
 from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes

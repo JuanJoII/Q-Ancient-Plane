@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 from Utils.tools import generar_parte
 from Utils.emerge import emerge_plane
-from PlaneRig import create_joints, spline_auto_rig, cntrl_curve
+from PlaneRig.full_rig import crear_rig_completo
 from Environment.terrain import crear_terreno_montanoso
 from Environment.cloud import crear_campo_nubes
 from Materials.materials import aplicar_material_oro, aplicar_material_montanas, aplicar_material_nubes, cambiar_color_montanas_aleatorio
@@ -43,13 +43,6 @@ def generar_cielo_con_material(**kwargs):
     """Genera el cielo y aplica el material automáticamente"""
     crear_campo_nubes(**kwargs)
     aplicar_material_nubes("campo_nubes")
-
-
-def crear_rig_completo():
-    """Crea el rig completo en un solo paso"""
-    create_joints.crear_rig_completo()
-    spline_auto_rig.build_spine_from_core_joints()
-    cntrl_curve.crear_control_avion()
 
 
 def crear_ui():
