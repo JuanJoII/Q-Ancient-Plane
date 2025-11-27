@@ -11,7 +11,9 @@
 
 ![Screen Shot 1](ReadmeImages/QAP_SS_001.png)  
 
-![Screen Shot 2](ReadmeImages/QAP_SS_002.png)  
+![Screen Shot 2](ReadmeImages/QAP_SS_002.png)
+
+![Comparación Boceto/Render](ReadmeImages/QAP_SS_003.png)  
 
 ## ✨ Características principales
 
